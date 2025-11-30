@@ -9,75 +9,70 @@
 </head>
 <body>
     <div class="h-full w-screen bg-gray-100">
-        <div class="recipeContainer flex flex-col justify-center items-center  space-y-10">
+        <div class="recipeContainer flex flex-col justify-center items-center space-y-10">
+            
             <h2 class="text-5xl font-bold mt-12">Recipe Finder</h2>
+
+            <!-- Search Bar -->
             <div class="flex">
-                <input type="text" placeholder="Search by name(e.g, 'chicken')" class="searchInput bg-gray-150 w-[500px] flex-1 px-4 py-3 text-lg"><button class="searchButton flex justify-center items-center text-white bg-green-500 font-bold py-1 px-6 text-xl rounded-r-lg">Search</button></div>
-            <button class="randomButton flex justify-center items-center  bg-orange-400 text-white font-bold py-3 px-10 rounded-lg">Get Random Recipe</button>
+                <input type="text" placeholder="Search by name (e.g., 'chicken')"
+                    class="searchInput bg-gray-100 w-[500px] px-4 py-3 text-lg rounded-l-lg">
+                <button class="searchButton text-white bg-green-500 font-bold py-3 px-6 text-xl rounded-r-lg">
+                    Search
+                </button>
+            </div>
+
+            <!-- Random button (fixed id added) -->
+            <button id="randomButton"
+                class="randomButton bg-orange-400 text-white font-bold py-3 px-10 rounded-lg">
+                Get Random Recipe
+            </button>
+
             <p class="text-xl">Search for a recipe or get a random one!</p>
 
-            
+            <!-- RESULTS GRID -->
+            <div class="resultsGrid grid grid-cols-1 gap-6">
 
-            <div class="resultsGrid">
+                <!-- Recipe Card -->
+                <div class="recipeItem hidden text-2xl w-[300px] bg-white rounded-2xl shadow-md 
+                    overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.03] cursor-pointer">
+                    
+                    <img src="" loading="lazy" 
+                         class="recipeItem-Image h-[200px] w-full rounded-t-lg object-cover" alt="recipe image">
 
-                <div class="recipeItem hidden bg-white text-2xl w-[300px] bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-400 hover:shadow-xl hover:scale-[1.03] cursor-pointer loading-lazy"> 
-                    <img src="" class="recipeItem-Image h-[200px] w-full rounded-t-lg object-cover"  alt="recipe image ">
                     <div class="p-3">
                         <p class="recipeItem-Name font-semibold"></p>
                         <p class="recipeItem-price font-bold text-green-500"></p>
                     </div>
-                    <div class="p-4 text-xl font-semibold"></div>
                 </div>
 
-                <div class="modalContainer bg-gray-50 rounded-lg hidden">
-
-                    <div class="modalContent space-y-4 text-2xl py-5 px-5">
-
-                        <div class="flex justify-between">
-
-                        <p class="modal-recipeItem-Name"></p>
-                        <button class="modal-closeButton">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                        </div>
-                        <img src="" class="modal-recipeItem-Image">
-                        <p>Category:<span class="modal-isVeg"> Vegeterian</span></p>
-                        <div class="greenLine w-full bg-green-500 h-[5px]"></div>
-                        <p>Ingrediants</p>
-                        <ul class="modal-ingrediantsContainer">
-
-                        </ul>
-                        <div class="greenLine w-full bg-green-500 h-[5px]"></div>
-                    </div>
+                <!-- Recipe Not Found -->
+                <div class="recipeNotFound hidden text-2xl text-red-500 font-semibold">
+                    <p>Recipe Not Found</p>
                 </div>
-
-                <div class="recipeNotFound hidden">
-                    <p>Recipe Not found</p>
-                </div>
-               
-
             </div>
 
         </div>
     </div>
-    <script>
-    const API_KEY = "235f5871995945a58524922f5999eab6";
 
-    const recipeNotFound = document.querySelector(".recipeNotFound");
+<script>
+const API_KEY = "235f5871995945a58524922f5999eab6";
 
-    const searchInput = document.querySelector(".searchInput");
-    const searchButton = document.querySelector(".searchButton");
+const recipeNotFound = document.querySelector(".recipeNotFound");
+const searchInput = document.querySelector(".searchInput");
+const searchButton = document.querySelector(".searchButton");
 
-    const recipeItem = document.querySelector(".recipeItem");
-    const recipeImg = document.querySelector(".recipeItem-Image");
-    const recipeName = document.querySelector(".recipeItem-Name");
-    const recipePrice = document.querySelector(".recipeItem-price");
-    const randomButton=document.querySelector("#randomButton");
+const recipeItem = document.querySelector(".recipeItem");
+const recipeImg = document.querySelector(".recipeItem-Image");
+const recipeName = document.querySelector(".recipeItem-Name");
+const recipePrice = document.querySelector(".recipeItem-price");
 
-    async function randomButtonHandler() {
-    
+const randomButton = document.querySelector("#randomButton");
+
+// ------------------- RANDOM RECIPE -------------------
+async function randomButtonHandler() {
+    try {
         const url = `https://api.spoonacular.com/recipes/random?number=1&apiKey=${API_KEY}`;
-
         const response = await fetch(url);
         const data = await response.json();
 
@@ -89,38 +84,41 @@
 
         recipeNotFound.classList.add("hidden");
 
-        
         const recipe = data.recipes[0];
-
         const obj = {
             title: recipe.title,
             image: recipe.image,
-            pricePerServing: recipe.pricePerServing
+            pricePerServing: recipe.pricePerServing || 0
         };
 
         displayRecipe(obj);
+    } 
+    catch (err) {
+        recipeNotFound.classList.remove("hidden");
+        recipeNotFound.textContent = "API limit reached";
     }
+}
 
-    randomButton.addEventListener('click',randomButtonHandler);
-    
-    function displayRecipe(obj) {
-        recipeItem.classList.remove("hidden");
-        recipeImg.src = obj.image;
-        recipeName.textContent = obj.title;
-        recipePrice.textContent = "₹ " + (obj.pricePerServing / 1.2).toFixed(0);
-    }
+randomButton.addEventListener("click", randomButtonHandler);
 
-    async function searchHandler() {
-        const query = searchInput.value.trim();
-        if (!query) return;
+// ------------------- DISPLAY RECIPE -------------------
+function displayRecipe(obj) {
+    recipeItem.classList.remove("hidden");
+    recipeImg.src = obj.image;
+    recipeName.textContent = obj.title;
+    recipePrice.textContent = "₹ " + Math.max(1, obj.pricePerServing / 1.2).toFixed(0);
+}
 
-       
+// ------------------- SEARCH HANDLER -------------------
+async function searchHandler() {
+    const query = searchInput.value.trim();
+    if (!query) return;
+
+    try {
         const url = `https://api.spoonacular.com/recipes/complexSearch?query=${query}&number=5&addRecipeInformation=true&apiKey=${API_KEY}`;
-
         const response = await fetch(url);
         const data = await response.json();
 
-        
         if (!data.results || data.results.length === 0) {
             recipeNotFound.classList.remove("hidden");
             recipeItem.classList.add("hidden");
@@ -129,14 +127,17 @@
 
         recipeNotFound.classList.add("hidden");
 
-       
         displayRecipe(data.results[0]);
-
         searchInput.value = "";
+    } 
+    catch (err) {
+        recipeNotFound.classList.remove("hidden");
+        recipeNotFound.textContent = "API limit reached";
     }
+}
 
-    searchButton.addEventListener("click", searchHandler);
-    searchInput.addEventListener("change", searchHandler);
+searchButton.addEventListener("click", searchHandler);
+searchInput.addEventListener("change", searchHandler);
 </script>
 
 </body>
