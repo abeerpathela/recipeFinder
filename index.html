@@ -13,10 +13,10 @@
             <h2 class="text-5xl font-bold mt-12">Recipe Finder</h2>
             <div class="flex">
                 <input type="text" placeholder="Search by name(e.g, 'chicken')" class="searchInput bg-gray-150 w-[500px] flex-1 px-4 py-3 text-lg"><button class="searchButton flex justify-center items-center text-white bg-green-500 font-bold py-1 px-6 text-xl rounded-r-lg">Search</button></div>
-            <button class="flex justify-center items-center  bg-orange-400 text-white font-bold py-3 px-10 rounded-lg">Get Random Recipe</button>
+            <button class="randomButton flex justify-center items-center  bg-orange-400 text-white font-bold py-3 px-10 rounded-lg">Get Random Recipe</button>
             <p class="text-xl">Search for a recipe or get a random one!</p>
 
-            <div class="messageArea hidden"></div>
+            
 
             <div class="resultsGrid">
 
@@ -72,7 +72,36 @@
     const recipeImg = document.querySelector(".recipeItem-Image");
     const recipeName = document.querySelector(".recipeItem-Name");
     const recipePrice = document.querySelector(".recipeItem-price");
+    const randomButton=document.querySelector("#randomButton");
 
+    async function randomButtonHandler() {
+    
+        const url = `https://api.spoonacular.com/recipes/random?number=1&apiKey=${API_KEY}`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!data.recipes || data.recipes.length === 0) {
+            recipeNotFound.classList.remove("hidden");
+            recipeItem.classList.add("hidden");
+            return;
+        }
+
+        recipeNotFound.classList.add("hidden");
+
+        
+        const recipe = data.recipes[0];
+
+        const obj = {
+            title: recipe.title,
+            image: recipe.image,
+            pricePerServing: recipe.pricePerServing
+        };
+
+        displayRecipe(obj);
+    }
+
+    randomButton.addEventListener('click',randomButtonHandler);
     
     function displayRecipe(obj) {
         recipeItem.classList.remove("hidden");
